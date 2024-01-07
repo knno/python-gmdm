@@ -1,0 +1,11 @@
+name: My Project.yyp
+imports:
+  - path/to/proj1
+  - path/to/proj2:
+    - My Folder
+      to: My Extensions/My Folder
+    - My Other Folder
+
+exports:
+  - My Export First Folder
+  - My Main Folder/My Export Second Folder

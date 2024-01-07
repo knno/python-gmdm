@@ -1,0 +1,6 @@
+venv
+.env
+.terminal.bashrc
+.bashrc
+__*/
+_GMDM.code-workspace
