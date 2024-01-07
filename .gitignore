@@ -4,3 +4,6 @@ venv
 .bashrc
 __*/
 _GMDM.code-workspace
+dist
+
+*.egg-info/

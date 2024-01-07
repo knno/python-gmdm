@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """The GMDM CLI tool for managing dependencies of GameMaker projects and files.
 """
-__version__ = "0.0.1"
+__version__ = "0.2.3"
 
 import argparse
 import logging
@@ -102,7 +102,7 @@ def main():
 
     parser.add_argument('command',
                         help='Command to do with GMDM',
-                        choices=["help", "sync", "watch", "test",],
+                        choices=["help", "sync", "test",],
                         default="help",
                         )
 
@@ -125,13 +125,6 @@ def main():
                         dest="fake",
                         default=False,
                         help='run without actually doing the command.')
-
-    parser.add_argument('-B',
-                        '--back',
-                        action='store_true',
-                        dest="syncback",
-                        default=False,
-                        help='whether to sync back assets to the imported dep.')
 
     parser.add_argument('-V',
                         '--verbosity',

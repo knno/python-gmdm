@@ -66,7 +66,7 @@ class YYFolder:
     def __repr__(self) -> str:
         return self.__str__()
 
-    def has_asset(self, asset: YYAsset, recursive=False):
+    def has_asset(self, asset: YYAsset, recursive=True):
         if recursive:
             return asset.folder.startswith(self.pathyy[:-3])
         return asset.folder == self.pathyy

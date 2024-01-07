@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 import filecmp
-import os
 import logging
+import os
 
 from gmdm.defaults import GMDM_FILE
+from gmdm.models import YYAsset, YYFolder, YYProject
 from gmdm.ops import (AddAssetOperation, AddFolderOperation,
                       CopyDirectoryOperation, JsonModifyOperation,
                       ProjectSaveOperation)
 from gmdm.utils.files import compare_directories, read_yaml
 from gmdm.utils.strings import path_to_folder
-from gmdm.models import YYAsset, YYFolder, YYProject
-
 
 _current_app = None
 
@@ -138,7 +137,7 @@ class App:
             cmd = getattr(self, "command_" + args.command)
             cmd(args)
 
-    def operations_from_ymldict(self, ymldict, main_project: YYProject, both_directions=True):
+    def operations_from_ymldict(self, ymldict, main_project: YYProject):
         ops = []
 
         main_project_modified = False
@@ -177,31 +176,28 @@ class App:
                             compared = compare_directories(
                                 left=os.path.dirname(res.path),
                                 right=os.path.dirname(res.real_path),
-                                both_directions=both_directions
+                                both_directions=True
                             )
                         else:
                             compared = None
 
                         if compared is not None:
                             if compared == 1:
-                                if both_directions:
-                                    direction = -1
-                                    # Sync back resource.
-                                    # There's no need for imp project save.
-                                    ops.append(CopyDirectoryOperation(
-                                        os.path.dirname(res.path),
-                                        os.path.dirname(res.real_path),
-                                        name="CopyDirectoryBack"
-                                    ))
-                                    ops.append(JsonModifyOperation(
-                                        res.real_path,
-                                        {
-                                            "parent": _from_fdr.to_json
-                                        },
-                                        name="JsonModifyBack"
-                                    ))
-                                else:
-                                    direction = 0
+                                direction = -1
+                                # Sync back resource.
+                                # There's no need for imp project save.
+                                ops.append(CopyDirectoryOperation(
+                                    os.path.dirname(res.path),
+                                    os.path.dirname(res.real_path),
+                                    name="CopyDirectoryBack"
+                                ))
+                                ops.append(JsonModifyOperation(
+                                    res.real_path,
+                                    {
+                                        "parent": _from_fdr.to_json
+                                    },
+                                    name="JsonModifyBack"
+                                ))
 
                             elif compared == -1:
                                 # Asset exists (and its folder), just copy.
@@ -216,7 +212,7 @@ class App:
 
                         else:
                             direction = 1
-                            # Make YYfolder, Add asset to project, and copy.
+                            # Make YYfolders, Add asset to project, and copy.
                             ops.append(AddAssetOperation(
                                 main_project,
                                 YYAsset(res.path, main_project)
@@ -254,7 +250,7 @@ class App:
         return ops
 
     def command_test(self, args):
-        print("Hi!", args)
+        print("No tests applicable.")
 
     def command_sync(self, args):
         fpath = self.cwd + os.sep + GMDM_FILE
@@ -266,7 +262,7 @@ class App:
         project = YYProject(self.cwd + os.sep + ymldict["name"])
 
         # Get operations
-        ops = self.operations_from_ymldict(ymldict, project, args.syncback)
+        ops = self.operations_from_ymldict(ymldict, project)
         # Do operations
         for op in ops:
             if not args.fake:

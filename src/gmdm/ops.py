@@ -5,6 +5,7 @@ import shutil
 
 import json5
 
+from gmdm.models import YYFolder
 from gmdm.utils.dicts import dotset
 
 logger = logging.getLogger("GmDm")
@@ -59,6 +60,16 @@ class AddFolderOperation(BaseOperation):
         self.folder = folder
 
     def run(self):
+        # Recursive add folders.
+        paths = self.folder.pathyy[:-3].split("/")[1:]
+        pathyy = "folders/"
+        for path in paths:
+            pathyy += path
+            fdr = self.project.get_folder(pathyy)
+            if fdr is None:
+                fdr = YYFolder(pathyy + ".yy")
+                self.project.add_yyfolder(fdr)
+            pathyy += "/"
         self.project.add_yyfolder(self.folder)
         return True
 

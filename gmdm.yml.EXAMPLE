@@ -2,7 +2,7 @@ name: My Project.yyp
 imports:
   - path/to/proj1
   - path/to/proj2:
-    - My Folder
+    - My Folder:
       to: My Extensions/My Folder
     - My Other Folder
 
