@@ -4,6 +4,7 @@ from typing import List
 
 import json5
 
+from gmdm.utils.files import get_json_field
 from gmdm.utils.strings import name_from_path
 
 
@@ -20,9 +21,8 @@ class YYAsset:
     def load(self):
         if os.path.exists(self.real_path):
             with open(self.real_path, "r", encoding="utf-8") as f:
-                self._data = json5.load(f)
-
-            self.folder = self._data.get("parent")["path"]
+                data = f.read()
+            self.folder = get_json_field("parent", data)["path"]
 
     @property
     def to_project_json(self):

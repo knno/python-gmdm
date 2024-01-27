@@ -1,7 +1,29 @@
 # -*- coding: utf-8 -*-
-import os
-import yaml
 import filecmp
+import os
+import re
+
+import json5
+import yaml
+
+
+def get_json_field(field, string):
+    match = re.search(rf'"{field}":\s*', string)
+    if match:
+        start = match.span()[0]
+        dstr = string[start:]
+        s = 0
+        end = start+1
+        for i, c in enumerate(dstr):
+            if c == '{':
+                s += 1
+            elif c == '}':
+                s -= 1
+                if s == 0:
+                    end = i+1
+                    break
+    data = json5.loads("{" + dstr[:end] + "}")
+    return data.get(field)
 
 
 def read_yaml(filepath):
@@ -19,6 +41,8 @@ def compare_directories(left, right, both_directions=False):
     Using mtime and cmp.
     """
     compared = 0
+    compared_left = 0
+    compared_right = 0
     left_files = []
     right_files = []
     right_diff_files = []
@@ -52,7 +76,7 @@ def compare_directories(left, right, both_directions=False):
             right_file = right + os.sep + right_set[0]
 
             if filecmp.cmp(left_file, right_file):
-                if both_directions and compared is None: # Previous comparison happened...
+                if both_directions and compared is None:  # Previous comparison happened...
                     compared = 0
                     break
                 compared = None
@@ -64,7 +88,6 @@ def compare_directories(left, right, both_directions=False):
                 compared_left = max(left_set[1], compared_left)
                 compared_right = max(right_set[1], compared_right)
                 compared = None
-
 
     if compared is not None:
         if compared_left > compared_right:
