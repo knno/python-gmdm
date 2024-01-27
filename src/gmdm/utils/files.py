@@ -41,8 +41,8 @@ def compare_directories(left, right, both_directions=False):
     Using mtime and cmp.
     """
     compared = 0
-    compared_left = 0
-    compared_right = 0
+    compared_left = -1000
+    compared_right = -1000
     left_files = []
     right_files = []
     right_diff_files = []

@@ -156,7 +156,6 @@ class App:
                         F"\"{to_imp['from']}\" Does not exist in Project \"{imp_project}\"")
 
                 _from_fdr = imp_project.get_yyfolder(to_imp["from"])
-
                 _to_fdr = main_project.get_yyfolder(to_imp["to"])
 
                 if _to_fdr is None:
@@ -168,6 +167,8 @@ class App:
                     main_project_modified = True
 
                 for res in imp_project.resources:
+                    new_folder_path = res.folder.replace(
+                        _from_fdr.pathyy[:-3], _to_fdr.pathyy[:-3])
                     if _from_fdr.has_asset(res):
 
                         res_to = main_project.get_resource(res.path)
@@ -191,10 +192,11 @@ class App:
                                     os.path.dirname(res.real_path),
                                     name="CopyDirectoryBack"
                                 ))
+                                fdr = YYFolder(res.folder) # Old folder path
                                 ops.append(JsonModifyOperation(
                                     res.real_path,
                                     {
-                                        "parent": _from_fdr.to_json
+                                        "parent": fdr.to_json,
                                     },
                                     name="JsonModifyBack"
                                 ))
@@ -213,6 +215,14 @@ class App:
                         else:
                             direction = 1
                             # Make YYfolders, Add asset to project, and copy.
+                            fdr = main_project.get_yyfolder(new_folder_path)
+                            if fdr is None:
+                                fdr = YYFolder(new_folder_path)
+                                ops.append(AddFolderOperation(
+                                    main_project,
+                                    fdr,
+                                ))
+
                             ops.append(AddAssetOperation(
                                 main_project,
                                 YYAsset(res.path, main_project)
@@ -235,10 +245,17 @@ class App:
                                     modify_asset_to_fdr = True
 
                         if modify_asset_to_fdr:
+                            fdr = main_project.get_yyfolder(new_folder_path)
+                            if fdr is None:
+                                fdr = YYFolder(new_folder_path)
+                                ops.append(AddFolderOperation(
+                                    main_project,
+                                    fdr,
+                                ))
                             ops.append(JsonModifyOperation(
                                 res.path,
                                 {
-                                    "parent": _to_fdr.to_json
+                                    "parent": fdr.to_json,
                                 }
                             ))
 
