@@ -1,6 +1,6 @@
 [project]
 name = "gmdm"
-version = "0.2.5"
+version = "0.2.6"
 authors = [{name = "Kenan Masri", email = "kenanmasri@outlook.com"}]
 description = "The GMDM CLI tool for managing dependencies of GameMaker projects and files."
 readme = "README.md"

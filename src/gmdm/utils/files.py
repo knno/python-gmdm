@@ -35,7 +35,7 @@ def read_yaml(filepath):
         return ymldic
 
 
-def compare_directories(left, right, both_directions=False):
+def compare_directories(left, right):
     """Return -1 if left dir is newer than right, or 1, or 0.
     This will compare each file to find the directory with newest file.
     Using mtime and cmp.
@@ -75,19 +75,23 @@ def compare_directories(left, right, both_directions=False):
             left_file = left + os.sep + left_set[0]
             right_file = right + os.sep + right_set[0]
 
-            if filecmp.cmp(left_file, right_file):
-                if both_directions and compared is None:  # Previous comparison happened...
-                    compared = 0
-                    break
-                compared = None
-                break
+            # If there's a renaming, exclude the field from comparison.
+            if left_file[-3:] == ".yy" and right_file[-3:] == ".yy":
+                if not filecmp.cmp(left_file, right_file):
+                    with open(left_file, "r", encoding="utf-8") as f:
+                        ljson = json5.load(f)
+                        del ljson["parent"]
+                    with open(right_file, "r", encoding="utf-8") as f:
+                        rjson = json5.load(f)
+                        del rjson["parent"]
+                    if ljson == rjson:
+                        continue
 
-            if left_set[1] == right_set[1]:
+            if filecmp.cmp(left_file, right_file):
                 continue
-            else:
-                compared_left = max(left_set[1], compared_left)
-                compared_right = max(right_set[1], compared_right)
-                compared = None
+            compared_left = max(left_set[1], compared_left)
+            compared_right = max(right_set[1], compared_right)
+            compared = True
 
     if compared is not None:
         if compared_left > compared_right:

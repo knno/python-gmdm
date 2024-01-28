@@ -176,8 +176,7 @@ class App:
                         if res_to is not None:
                             compared = compare_directories(
                                 left=os.path.dirname(res.path),
-                                right=os.path.dirname(res.real_path),
-                                both_directions=True
+                                right=os.path.dirname(res.real_path)
                             )
                         else:
                             compared = None
