@@ -26,12 +26,44 @@ def get_json_field(field, string):
     return data.get(field)
 
 
+def yaml_loader():
+    """Custom YAML loader."""
+    pattern = re.compile('.*?\${(\w+)}.*?')
+    loader = yaml.SafeLoader
+    tag = '!ENV'
+    loader.add_implicit_resolver(tag, pattern, None)
+
+    def constructor_env_variables(loader, node):
+        """
+        Extracts the environment variable from the node's value
+        :param yaml.Loader loader: the yaml loader
+        :param node: the current node in the yaml
+        :return: the parsed string that contains the value of the environment
+        variable
+        """
+        value = loader.construct_scalar(node)
+        match = pattern.findall(value)  # to find all env variables in line
+        if match:
+            full_value = value
+            for g in match:
+                full_value = full_value.replace(
+                    f'${{{g}}}', os.environ.get(g, g)
+                )
+            return full_value
+        return value
+
+    loader.add_constructor(tag, constructor_env_variables)
+    return loader
+
+
 def read_yaml(filepath):
     """Open and read YAML file and return a dictionary representation.
     """
+    if not os.path.exists(filepath):
+        raise FileNotFoundError(filepath)
 
     with open(filepath, "r", encoding="utf-8") as stream:
-        ymldic = yaml.safe_load(stream)
+        ymldic = yaml.load(stream, Loader=yaml_loader())
         return ymldic
 
 

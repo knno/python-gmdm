@@ -25,7 +25,41 @@ def rearrange_imports(imports):
         if isinstance(projpath, dict):
             proj = list(projpath)[0]
             fdr = projpath[proj]
-            ymldict2 = read_yaml(proj + os.sep + GMDM_FILE)
+            possible_dirs = os.environ.get("GMDM_IMPORT_DIRS") or ""
+            possible_dirs = [p for p in possible_dirs.split(os.pathsep)]
+            possible_dirs.extend([
+                "", # Absolute path
+                ".", # Relative path
+                os.path.expanduser(
+                    '~') + '/Documents/GameMakerStudio2/Projects', # User dir
+            ])
+            possible_dirs = set(possible_dirs)
+            prj = None
+            while len(possible_dirs) > 0:
+                _dir = possible_dirs.pop()
+                if _dir != "":
+                    _dir = _dir + os.sep
+                if os.path.exists(_dir + proj):
+                    prj = _dir + proj
+                    break
+
+            if prj is None:
+                raise LookupError(f"Project was not found: \"{proj}\"")
+
+            proj = prj
+            # Change the key
+            imports[i] = {proj: fdr}
+
+            try:
+                ymldict2 = read_yaml(proj + os.sep + GMDM_FILE)
+            except FileNotFoundError as e:
+                # No GMDM file, detect the yyp and add placeholder.
+                f = os.path.basename(proj) + ".yyp"
+                if os.path.exists(proj + os.sep + f):
+                    ymldict2 = {'name': f, }
+                else:
+                    raise e
+
             if "name" not in ymldict2:
                 raise NameError(
                     F"A project is not named: \"{proj}\".")
@@ -62,8 +96,8 @@ def rearrange_imports(imports):
                             del current_project2
 
                             if ymldict2["exports"]:
-                                for i, val in enumerate(ymldict2["exports"]):
-                                    ymldict2["exports"][i] = path_to_folder(
+                                for k, val in enumerate(ymldict2["exports"]):
+                                    ymldict2["exports"][k] = path_to_folder(
                                         val)
 
                             if not ymldict2["exports"]:
@@ -191,7 +225,7 @@ class App:
                                     os.path.dirname(res.real_path),
                                     name="CopyDirectoryBack"
                                 ))
-                                fdr = YYFolder(res.folder) # Old folder path
+                                fdr = YYFolder(res.folder)  # Old folder path
                                 ops.append(JsonModifyOperation(
                                     res.real_path,
                                     {
@@ -216,11 +250,17 @@ class App:
                             # Make YYfolders, Add asset to project, and copy.
                             fdr = main_project.get_yyfolder(new_folder_path)
                             if fdr is None:
-                                fdr = YYFolder(new_folder_path)
-                                ops.append(AddFolderOperation(
-                                    main_project,
-                                    fdr,
-                                ))
+                                _fo = [afo for afo in ops if isinstance(
+                                    afo, AddFolderOperation)]
+                                _fo = [fo for fo in _fo
+                                       if fo.folder.pathyy == new_folder_path
+                                       and fo.project.path == main_project.path]
+                                if len(_fo) == 0:
+                                    fdr = YYFolder(new_folder_path)
+                                    ops.append(AddFolderOperation(
+                                        main_project,
+                                        fdr,
+                                    ))
 
                             ops.append(AddAssetOperation(
                                 main_project,
@@ -247,16 +287,23 @@ class App:
                             fdr = main_project.get_yyfolder(new_folder_path)
                             if fdr is None:
                                 fdr = YYFolder(new_folder_path)
-                                ops.append(AddFolderOperation(
-                                    main_project,
-                                    fdr,
+                                _fo = [afo for afo in ops if isinstance(
+                                    afo, AddFolderOperation)]
+                                _fo = [fo for fo in _fo
+                                       if fo.folder.pathyy == new_folder_path
+                                       and fo.project.path == main_project.path]
+                                if len(_fo) == 0:
+                                    ops.append(AddFolderOperation(
+                                        main_project,
+                                        fdr,
+                                    ))
+                            if fdr is not None:
+                                ops.append(JsonModifyOperation(
+                                    res.path,
+                                    {
+                                        "parent": fdr.to_json,
+                                    }
                                 ))
-                            ops.append(JsonModifyOperation(
-                                res.path,
-                                {
-                                    "parent": fdr.to_json,
-                                }
-                            ))
 
                 if main_project_modified:
                     ops.append(ProjectSaveOperation(
@@ -274,7 +321,11 @@ class App:
             self.logger.error(f"File \"{fpath}\" does not exist.")
             return False
 
-        ymldict = self.get_yaml(fpath)
+        try:
+            ymldict = self.get_yaml(fpath)
+        except FileNotFoundError:
+            return 1
+
         project = YYProject(self.cwd + os.sep + ymldict["name"])
 
         # Get operations

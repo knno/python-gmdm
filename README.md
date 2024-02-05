@@ -18,13 +18,21 @@ In the second way, you will have to activate the virtual environment every time 
 
 ## Usage
 
-Now that you have installed this package, you can set up your projects to work with it.
+Now that you have installed this package, you will have to set up the projects that do the imports (current project) to work with it.
 
-For any GameMaker project to be compatible with GmDm, you will have to create a `gmdm.yml` file inside each GameMaker project's folder.
-This file will define the file name, optionally imports and exports, if any, of your GameMaker projects.
+For any GameMaker project to be compatible with GmDm, you don't have to create a `gmdm.yml` file inside each GameMaker project's folder.
+This file is optional. It defines the yyp file name, optionally imports and exports, if any, of your GameMaker project(s).
 
 It simply tells GmDm that this project imports a GameMaker "Folder" or Group of resources from other projects.
 These other projects should be GmDm compatible.
+
+Projects to be imported are looked up in multiple directories:
+
+1. `${GMDM_IMPORT_DIRS}` env variable. Which is string of paths delimited by ;
+2. Absolute path.
+3. relative to current directory.
+4. ~/Documents/GameMakerStudio2/Projects.
+
 
 ### Basic Usage
 
@@ -70,9 +78,8 @@ For advance usage, you can see the file `gmdm.yml.EXAMPLE`.
 Now you can use `gmdm sync`, or any of these commands when inside your project directory:
 
 ```bash
+gmdm sync --fake    # displays operations without actually performing any. Useful for visualization of what will happen.
 gmdm sync           # performs reimporting (newely modified assets from the imported projects)
-gmdm sync --fake    # displays operations without actually performing any.
-gmdm sync --back    # performs sync (modified assets from and to imported projects)
 ```
 
 To show the help, you can use the following command:
@@ -87,32 +94,38 @@ Consider using `to` in order to have the same path from multiple projects.
 ```yml
 name: Project1.yyp
 imports:
-  - ../project2:
+  - path/to/project2:
     - My Main Folder/My Folder:
       to: Extensions/My Project 2 Folder
   - ../project3:
-    - My Main Folder/My Folder:
+    - My Main Folder/My Different Folder:
       to: Extensions/My Project 3 Folder
+  - !ENV '${MY_DIR}/project5'
+
+  - AWellKnownProject
+
 ```
 
 ## Notes
 
 Do:
 
-- Keep things simple.
+- Keep things simple. 
 - Use this for your own local machine package management.
 - Know what you are importing.
 
 Do not:
 
 - Do not import the same assets or folders that have the same assets from multiple projects.
-- Do not import the same folder path from mutliple projects. Use `to` in this case.
+- Do not import the same folder path from multiple projects. Use `to` in this case.
 
 Other:
 
 - Zombie files are kept.
 - GmDm is intelligent enough to handle renamed imports when syncing.
-
+- If a project does not have specific exports, it is thoroughly imported.
+- If a project does not have a gmdm.yml file, it will still be able to be a dependency.
+- For best usage, clone the repos of projects, that you want as dependencies, to a specific directory. Then use gmdm to import them. It is best to set up an environment variable `GMDM_IMPORT_DIRS=/d/Projects/;/e/GameMaker/`
 
 ## Contributing
 
