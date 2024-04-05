@@ -47,8 +47,10 @@ class YYFolder:
     @property
     def to_project_json(self):
         return {
+            "$GMFolder": "",
+            "%Name": name_from_path(self.pathyy),
             "resourceType": "GMFolder",
-            "resourceVersion": "1.0",
+            "resourceVersion": "2.0",
             "name": name_from_path(self.pathyy),
             "folderPath": self.pathyy,
         }
