@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """The GMDM CLI tool for managing dependencies of GameMaker projects and files.
 """
-__version__ = "0.2.7"
+__version__ = "0.2.8"
 
 import argparse
 import logging
