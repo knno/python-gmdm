@@ -2,6 +2,11 @@
 
 A GameMaker Dependency Management system
 
+[![Issues][issues-shield]][issues-url]
+[![Downloads](https://img.shields.io/pypi/dm/gmdm)]()
+[![Stargazers][stars-shield]][stars-url]
+[![MIT License][license-shield]][license-url]
+
 ## Installation
 
 To install this project as a global Python package, you need to have Python installed on your system. Then, follow these steps:
@@ -139,3 +144,11 @@ This project is open for contributions. If you want to contribute, please follow
 ## License
 
 This project is licensed under the MIT License. See the LICENSE file for more details.
+
+
+[stars-shield]: https://img.shields.io/github/stars/knno/gmdm.svg
+[stars-url]: https://github.com/knno/gmdm/stargazers
+[issues-shield]: https://img.shields.io/github/issues/knno/gmdm.svg
+[issues-url]: https://github.com/knno/gmdm/issues
+[license-shield]: https://img.shields.io/github/license/knno/gmdm.svg
+[license-url]: https://github.com/knno/gmdm/blob/master/LICENSE.txt
