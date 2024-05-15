@@ -3,7 +3,7 @@
 A GameMaker Dependency Management system
 
 [![Issues][issues-shield]][issues-url]
-[![Downloads](https://img.shields.io/pypi/dm/gmdm)]()
+[![Downloads](https://static.pepy.tech/badge/gmdm)]()
 [![Stargazers][stars-shield]][stars-url]
 [![MIT License][license-shield]][license-url]
 
